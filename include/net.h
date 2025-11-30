@@ -1,5 +1,5 @@
-#ifndef CMPI_CONNECTION_H
-#define CMPI_CONNECTION_H
+#ifndef CMPI_NET_H
+#define CMPI_NET_H
 
 #include <stddef.h>
 #include <uv.h>
@@ -10,18 +10,19 @@ extern "C" {
 
 
 typedef struct {
-    uv_loop_t *loop;
+    char *data;
+    size_t len, cap;
+} cmpi_buffer_t;
+
+typedef struct {
+    uv_loop_t loop;
     uv_tcp_t socket;
     uv_connect_t connect_req;
 
     int is_connected;
     int error_state;
-    int is_connection_closed;
 
-    // Input data buffer (for scanf)
-    char *input_buf;
-    size_t input_len;
-    size_t input_cap;
+    cmpi_buffer_t input_buf, output_buf;
 } cmpi_connection_t;
 
 /** Makes connection to MCPI. */
@@ -66,4 +67,4 @@ int cmpi_count_separators(cmpi_connection_t *conn, int sep, int terminator);
 } // extern "C"
 #endif
 
-#endif // CMPI_CONNECTION_H
+#endif // CMPI_NET_H
