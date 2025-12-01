@@ -36,7 +36,10 @@ static void _init_buf(cmpi_buffer_t *buf)
 static void _cleanup_buf(cmpi_buffer_t *buf)
 {
     if(buf->data)
+    {
         free(buf->data);
+        buf->data = NULL;
+    }
 }
 
 
@@ -112,8 +115,8 @@ static void _on_connect(uv_connect_t *req, int status)
 // When writing is done (cmpi_net_flush)
 static void _on_write_done(uv_write_t *req, int status)
 {
-    if(req->data)
-        free(req->data);
+    cmpi_connection_t *conn = req->data;
+    _cleanup_buf(&conn->output_buf);
     
     free(req);
     if(status < 0)
@@ -210,7 +213,7 @@ void cmpi_net_flush(cmpi_connection_t *conn)
         return;
     }
 
-    req->data = conn->output_buf.data;
+    req->data = conn;
     uv_buf_t buf = uv_buf_init(conn->output_buf.data, conn->output_buf.len);
 
     int r = uv_write(req, (uv_stream_t *)&conn->socket, &buf, 1, _on_write_done);
