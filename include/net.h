@@ -50,12 +50,14 @@ void cmpi_net_printf(cmpi_connection_t *conn, const char *fmt, ...);
 void cmpi_net_flush(cmpi_connection_t *conn);
 
 /**
- * Scans connection input for fmt until some of terminators are encountered and returns it.
+ * Scans connection input for fmt until any of terminators are encountered and returns it.
  * 
  * It supports these %-specificators:
  * - %d, expects int *, reads a decimal integer.
  * - %f, expects double *, reads a floating point number.
  * - %s, expects char * and size_t (buffer size), reads a string.
+ * 
+ * On error not letting to sufficiently read input, or insufficient input, returns -1.
  */
 int cmpi_net_scanf(cmpi_connection_t *conn, const char *fmt, const char *terminators, ...);
 

@@ -69,22 +69,23 @@ static void _shift_buf(cmpi_buffer_t *buf, int n)
 
 
 // Wait while terminator is not present in buffer or connection is not terminated
-// Returns received terminator, -1 on error
-static int _wait_for_input(cmpi_connection_t *conn, const char *terminators)
+// Returns pointer to received terminator, NULL on error
+static char *_wait_for_input(cmpi_connection_t *conn, const char *terminators)
 {
+    char *ptr;
     while(conn->is_connected && !conn->error_state)
     {
         for(size_t i = 0; i < conn->input_buf.len; ++i)
         {
-            int c = conn->input_buf.data[i];
-            if(strchr(terminators, c) == NULL)
-                continue;
+            ptr = strchr(terminators, conn->input_buf.data[i]);
+            if(ptr != NULL)
+                return ptr;
         }
         
         uv_run(&conn->loop, UV_RUN_ONCE);
     }
 
-    return -1;
+    return NULL;
 }
 
 
@@ -254,7 +255,127 @@ void cmpi_net_flush(cmpi_connection_t *conn)
 
 int cmpi_net_scanf(cmpi_connection_t *conn, const char *fmt, const char *terminators, ...)
 {
-    return -1;
+    if(!conn->is_connected)
+        return -1;
+
+    char *input_it = conn->input_buf.data;
+    char *input_end = _wait_for_input(conn, terminators);
+    if(input_end == NULL)
+        return -1;
+
+    char *fmt_it = fmt;
+    char *fmt_end = fmt + strlen(fmt);
+
+    int term = *input_end;
+    int ret_value = -1;
+
+    va_list args;
+    va_start(args, terminators);
+
+    for(; input_it < input_end; ++input_it)
+    {
+        // If terminator encountered
+        if(*input_it == term)
+        {
+            // Fmt didn't reach the end, it's an error
+            ret_value = -1;
+            goto cleanup;
+        }
+        
+        // If fmt is not %
+        if(*fmt_it != '%')
+        {
+            // If input doesn't match fmt, it's an error
+            if(*input_it != *fmt_it)
+            {
+                ret_value = -1;
+                goto cleanup;
+            }
+
+            // Increment fmt
+            ++fmt_it;
+            // If fmt reached the end and next input is terminator
+            if(fmt_it == fmt_end)
+            {
+                // If next input is not term, it's an error
+                ret_value = *++input_it == term ? term : -1;
+                goto cleanup;
+            }
+            continue;
+        }
+
+        // Scanning logic
+        ++fmt_it;
+        if(fmt_it == fmt_end)
+        {
+            // Scan a pure % character from input
+            // If input is % and next input is terminator, it's a success
+            ret_value = *input_it == '%' && ++input_it == input_end ? term : -1;
+            goto cleanup;
+        }
+
+        if(*fmt_it != 's' && *fmt_it != 'd' && *fmt_it != 'f' || *fmt_it == '%')
+        {
+            // Scan a pure % character
+            if(*input_it != '%')
+            {
+                ret_value = -1;
+                goto cleanup;
+            }
+
+            // Increment fmt
+            ++fmt_it;
+            // If fmt reached the end and next input is terminator
+            if(fmt_it == fmt_end)
+            {
+                // If next input is not term, it's an error
+                ret_value = *++input_it == term ? term : -1;
+                goto cleanup;
+            }
+            continue;
+        }
+
+        // Get next to %-specificator character
+        // If fmt is ended here, using terminator
+        int next = ++fmt_it == fmt_end ? term : *fmt_it;
+
+        char *block_begin = input_it;
+        for(; *input_it != next; ++input_it);
+        
+        // Now input_it points to block end
+        // Zero it to make a NUL-terminated string
+        *input_it = 0;
+
+        if(*fmt_it == 's')
+        {
+            // Write into a string
+            char *dst = va_arg(args, char *);
+            size_t size = va_arg(args, size_t);
+            snprintf(dst, size, "%s", block_begin);
+        }
+        else if(*fmt_it == 'd')
+        {
+            int *dst = va_arg(args, int *);
+            *dst = strtol(block_begin, NULL, 10);
+        }
+        else // %f
+        {
+            double *dst = va_arg(args, double *);
+            *dst = strtod(block_begin, NULL);
+        }
+
+        // Done scanning
+        if(fmt_it == fmt_end)
+        {
+            ret_value = term;
+            goto cleanup;
+        }
+    }
+
+cleanup:
+    va_end(args);
+    _shift_buf(&conn->input_buf, input_end - conn->input_buf.data);
+    return ret_value;
 }
 
 
@@ -262,7 +383,7 @@ int cmpi_count_separators(cmpi_connection_t *conn, int sep, int terminator)
 {
     char terms[2] = {terminator, 0};
 
-    if(_wait_for_input(conn, terms) < 0)
+    if(_wait_for_input(conn, terms) == NULL)
         return -1;
     
     int count = 0;
