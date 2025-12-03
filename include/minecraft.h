@@ -46,7 +46,7 @@ void cmpi_set_blocks_with_data(
     int id, int data
 );
 
-/** Sets a standing sign (ID 63) with rotation and 4 lines of text. */
+/** Sets a standing sign (ID 63) with rotation and 4 lines of text. (RaspberryJuice extension) */
 void cmpi_set_standing_sign(
     cmpi_connection_t *conn, 
     int x, int y, int z,
@@ -57,7 +57,7 @@ void cmpi_set_standing_sign(
     const char *line4
 );
 
-/** Sets a wall sign (ID 68) with direction and 4 lines of text. */
+/** Sets a wall sign (ID 68) with direction and 4 lines of text. (RaspberryJuice extension) */
 void cmpi_set_wall_sign(
     cmpi_connection_t *conn, 
     int x, int y, int z,
@@ -68,7 +68,7 @@ void cmpi_set_wall_sign(
     const char *line4
 );
 
-/** Spawns an entity with ID at coords. */
+/** Spawns an entity with ID at coords. (RaspberryJuice extension) */
 void cmpi_spawn_entity(cmpi_connection_t *conn, double x, double y, double z, int id);
 
 /** Returns height (max non-air Y) at XZ plain coords. */
@@ -105,16 +105,16 @@ void cmpi_get_entity_types(
     char names[][CMPI_MAX_ENTITY_TYPE_NAME]
 );
 
-/** Returns count of entities in the world. */
+/** Returns count of entities in the world. (RaspberryJuice extension) */
 int cmpi_get_entities_count(cmpi_connection_t *conn);
 
-/** Fills buffer with all world entities data. */
+/** Fills buffer with all world entities data. (RaspberryJuice extension) */
 void cmpi_get_entities(cmpi_connection_t *conn, cmpi_world_entity_info_t *buffer);
 
-/** Returns whether was entity with ID removed or there's no entity with ID. */
+/** Returns whether was entity with ID removed or there's no entity with ID. (RaspberryJuice extension) */
 int cmpi_remove_entity_by_id(cmpi_connection_t *conn, int id);
 
-/** Returns count of removed entities with type ID. */
+/** Returns count of removed entities with type ID. (RaspberryJuice extension) */
 int cmpi_remove_entities_by_type(cmpi_connection_t *conn, int type_id);
 
 
