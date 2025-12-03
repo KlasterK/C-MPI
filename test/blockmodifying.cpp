@@ -2,46 +2,10 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include "commontest.hpp"
 
 using namespace std::chrono_literals;
-
-#define _TST(fn, conn, ...) \
-{ \
-    (fn)((conn), ##__VA_ARGS__); \
-    if((conn)->error_state) \
-    { \
-        std::cout << #fn \
-                  << ": is_connected=" << (conn)->is_connected \
-                  << ", error_state=" << (conn)->error_state << std::endl; \
-        exit((conn)->error_state); \
-    } \
-}
-
-#define _STORE(dst, fn, conn, ...) \
-{ \
-    (dst) = (fn)((conn), ##__VA_ARGS__); \
-    if((conn)->error_state) \
-    { \
-        std::cout << #fn \
-                  << ": is_connected=" << (conn)->is_connected \
-                  << ", error_state=" << (conn)->error_state << std::endl; \
-        exit((conn)->error_state); \
-    } \
-}
-
-#define _ASSERT(expr) \
-{ \
-    if(!!(expr)) \
-    { \
-        std::cout << "Assertion failed: " << #expr << std::endl; \
-        exit(1); \
-    } \
-}
-
-constexpr int GOLD_BLOCK = 41;
-constexpr int IRON_BLOCK = 42;
-
-#define coords 2, 66, -83
+constexpr int X = DFLX + 1;
 
 int main()
 {
@@ -49,15 +13,15 @@ int main()
     int block_id, new_block_id;
 
     _TST(cmpi_net_connect_default, &conn);
-    _STORE(block_id, cmpi_get_block, &conn, coords);
+    _STORE(block_id, cmpi_get_block, &conn, X, DFLY, DFLZ);
     if(block_id != GOLD_BLOCK)
         block_id = GOLD_BLOCK;
     else
         block_id = IRON_BLOCK;
 
-    _TST(cmpi_set_block, &conn, coords, block_id);
+    _TST(cmpi_set_block, &conn, X, DFLY, DFLZ, block_id);
     std::this_thread::sleep_for(100ms);
-    _STORE(new_block_id, cmpi_get_block, &conn, coords);
+    _STORE(new_block_id, cmpi_get_block, &conn, X, DFLY, DFLZ);
     // TODO: Assertion is intermittently failing
     // Although in game, block is set correctly
     // The assertion fails non-deterministically, succeeding most of the time

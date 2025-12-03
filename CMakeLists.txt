@@ -19,18 +19,16 @@ install(TARGETS c-mpi DESTINATION lib)
 
 enable_testing()
 
-add_executable(c-mpi_setblock test/setblock.cpp)
-target_link_libraries(c-mpi_setblock PRIVATE c-mpi)
-add_test(NAME c-mpi_setblock COMMAND c-mpi_setblock)
-set_tests_properties(c-mpi_setblock PROPERTIES
-    SKIP_REGULAR ON
-    LABELS "ServerRequired"
-)
+function(cmpi_add_server_test NAME)
+    add_executable(c-mpi_${NAME} "test/${NAME}.cpp")
+    target_link_libraries(c-mpi_${NAME} PRIVATE c-mpi)
+    add_test(NAME c-mpi_${NAME} COMMAND c-mpi_${NAME})
+    set_tests_properties(c-mpi_${NAME} PROPERTIES
+        SKIP_REGULAR ON 
+        LABELS "ServerRequired" 
+    )
+endfunction()
 
-add_executable(c-mpi_blockmodifying test/blockmodifying.cpp)
-target_link_libraries(c-mpi_blockmodifying PRIVATE c-mpi)
-add_test(NAME c-mpi_blockmodifying COMMAND c-mpi_blockmodifying)
-set_tests_properties(c-mpi_blockmodifying PROPERTIES
-    SKIP_REGULAR ON
-    LABELS "ServerRequired"
-)
+cmpi_add_server_test(setblock)
+cmpi_add_server_test(blockmodifying)
+cmpi_add_server_test(placesign)
