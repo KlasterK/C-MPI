@@ -26,3 +26,11 @@ set_tests_properties(c-mpi_setblock PROPERTIES
     SKIP_REGULAR ON
     LABELS "ServerRequired"
 )
+
+add_executable(c-mpi_blockmodifying test/blockmodifying.cpp)
+target_link_libraries(c-mpi_blockmodifying PRIVATE c-mpi)
+add_test(NAME c-mpi_blockmodifying COMMAND c-mpi_blockmodifying)
+set_tests_properties(c-mpi_blockmodifying PROPERTIES
+    SKIP_REGULAR ON
+    LABELS "ServerRequired"
+)
