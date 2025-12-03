@@ -258,13 +258,13 @@ int cmpi_net_scanf(cmpi_connection_t *conn, const char *fmt, const char *termina
     if(!conn->is_connected)
         return -1;
 
-    char *input_it = conn->input_buf.data;
     char *input_end = _wait_for_input(conn, terminators);
+    char *input_it = conn->input_buf.data;
     if(input_end == NULL)
         return -1;
 
-    char *fmt_it = fmt;
-    char *fmt_end = fmt + strlen(fmt);
+    const char *fmt_it = fmt;
+    const char *fmt_end = fmt + strlen(fmt);
 
     int term = *input_end;
     int ret_value = -1;
@@ -337,6 +337,7 @@ int cmpi_net_scanf(cmpi_connection_t *conn, const char *fmt, const char *termina
 
         // Get next to %-specificator character
         // If fmt is ended here, using terminator
+        int spec = *fmt_it;
         int next = ++fmt_it == fmt_end ? term : *fmt_it;
 
         char *block_begin = input_it;
@@ -346,14 +347,14 @@ int cmpi_net_scanf(cmpi_connection_t *conn, const char *fmt, const char *termina
         // Zero it to make a NUL-terminated string
         *input_it = 0;
 
-        if(*fmt_it == 's')
+        if(spec == 's')
         {
             // Write into a string
             char *dst = va_arg(args, char *);
             size_t size = va_arg(args, size_t);
             snprintf(dst, size, "%s", block_begin);
         }
-        else if(*fmt_it == 'd')
+        else if(spec == 'd')
         {
             int *dst = va_arg(args, int *);
             *dst = strtol(block_begin, NULL, 10);
