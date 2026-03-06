@@ -78,7 +78,7 @@ int cmpi_get_height(cmpi_connection_t *conn, int x, int z);
 int cmpi_get_players_count(cmpi_connection_t *conn);
 
 /** Fills buffer with connected players entity IDs. */
-void cmpi_get_player_entity_ids(cmpi_connection_t *conn, int *buffer);
+void cmpi_get_player_entity_ids(cmpi_connection_t *conn, int *buffer, size_t size);
 
 /** Returns entity ID of player with name, or -1 if there's no player with name. */
 int cmpi_get_player_entity_id_by_name(cmpi_connection_t *conn, const char *name);
@@ -102,14 +102,15 @@ int cmpi_get_entity_types_count(cmpi_connection_t *conn);
 void cmpi_get_entity_types(
     cmpi_connection_t *conn, 
     int *type_ids, 
-    char names[][CMPI_MAX_ENTITY_TYPE_NAME]
+    char names[][CMPI_MAX_ENTITY_TYPE_NAME], 
+    size_t size
 );
 
 /** Returns count of entities in the world. (RaspberryJuice extension) */
 int cmpi_get_entities_count(cmpi_connection_t *conn);
 
 /** Fills buffer with all world entities data. (RaspberryJuice extension) */
-void cmpi_get_entities(cmpi_connection_t *conn, cmpi_world_entity_info_t *buffer);
+void cmpi_get_entities(cmpi_connection_t *conn, cmpi_world_entity_info_t *buffer, size_t size);
 
 /** Returns whether was entity with ID removed or there's no entity with ID. (RaspberryJuice extension) */
 int cmpi_remove_entity_by_id(cmpi_connection_t *conn, int id);
