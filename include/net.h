@@ -62,7 +62,7 @@ void cmpi_net_flush(cmpi_connection_t *conn);
 int cmpi_net_scanf(cmpi_connection_t *conn, const char *fmt, const char *terminators, ...);
 
 /** Returns count of sep presences until terminator is encountered. */
-int cmpi_count_separators(cmpi_connection_t *conn, int sep, int terminator);
+int cmpi_net_count_separators(cmpi_connection_t *conn, int sep, int terminator);
 
 
 #ifdef __cplusplus

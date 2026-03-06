@@ -380,7 +380,7 @@ cleanup:
 }
 
 
-int cmpi_count_separators(cmpi_connection_t *conn, int sep, int terminator)
+int cmpi_net_count_separators(cmpi_connection_t *conn, int sep, int terminator)
 {
     char terms[2] = {terminator, 0};
 
