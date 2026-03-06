@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <uv.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,24 +12,38 @@ extern "C" {
 
 typedef struct {
     char *data;
-    size_t len, cap;
-} cmpi_buffer_t;
+    size_t len;
+    size_t cap;
+} cmpi_net_buffer_t;
 
 typedef struct {
-    uv_loop_t loop;
-    uv_tcp_t socket;
-    uv_connect_t connect_req;
+    uv_loop_t loop;                 //!< Private
+    uv_tcp_t socket;                //!< Private
+    uv_connect_t connect_req;       //!< Private
+    cmpi_net_buffer_t input_buf;    //!< Private
+    cmpi_net_buffer_t output_buf;   //!< Private
+    int error_uv;                   //!< Private
+    int error_internal;             //!< Private
 
-    int is_connected;
-    int error_state;
-
-    cmpi_buffer_t input_buf, output_buf;
+    /// If true, then connected to a server, false otherwise
+    bool is_connected;
+    /// If true, then an error happened.
+    /// cmpi_net functions will immediately return if a connection with error_state set was passed.
+    bool error_state;
 } cmpi_connection_t;
 
-/** Makes connection to MCPI. */
+/** 
+ * Establishes a connection to MCPI. 
+ *
+ * Check conn->is_connected after call of this function.
+ */
 void cmpi_net_connect(cmpi_connection_t *conn, const char *address, int port);
 
-/** Makes connection to MCPI using defaults (localhost:4711). */
+/** 
+ * Establishes a connection to MCPI using defaults (localhost:4711).
+ *
+ * Check conn->is_connected after call of this function.
+ */
 void cmpi_net_connect_default(cmpi_connection_t *conn);
 
 /** Closes MCPI connection. */
@@ -63,6 +78,17 @@ int cmpi_net_scanf(cmpi_connection_t *conn, const char *fmt, const char *termina
 
 /** Returns count of sep presences until terminator is encountered. */
 int cmpi_net_count_separators(cmpi_connection_t *conn, int sep, int terminator);
+
+/** 
+ * Returns statically stored net system error message.
+ * 
+ * - "Success" if no error on this connection
+ * - "Unknown" if an unknown error on this connection
+ * - Error message from net backend (libuv).
+ *
+ * Don't free given memory. NULL is never returned.
+ */
+const char *cmpi_net_get_error(cmpi_connection_t *conn);
 
 
 #ifdef __cplusplus
