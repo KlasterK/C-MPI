@@ -1,6 +1,5 @@
-#include <iostream>
 #include "minecraft.h"
-#include "commontest.hpp"
+#include "commontest.h"
 
 int main()
 {

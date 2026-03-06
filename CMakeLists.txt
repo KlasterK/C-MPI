@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(C-MPI LANGUAGES C CXX VERSION 0.1)
+project(C-MPI LANGUAGES C VERSION 0.1)
 
 find_path(LIBUV_INCLUDE_DIR NAMES uv.h)
 find_library(LIBUV_LIBRARIES NAMES uv libuv)
@@ -20,7 +20,7 @@ install(TARGETS c-mpi DESTINATION lib)
 enable_testing()
 
 function(cmpi_add_server_test NAME)
-    add_executable(c-mpi_${NAME} "test/${NAME}.cpp")
+    add_executable(c-mpi_${NAME} "tests/${NAME}.c")
     target_link_libraries(c-mpi_${NAME} PRIVATE c-mpi)
     add_test(NAME c-mpi_${NAME} COMMAND c-mpi_${NAME})
     set_tests_properties(c-mpi_${NAME} PROPERTIES

@@ -1,11 +1,8 @@
 #include "minecraft.h"
-#include <iostream>
-#include <chrono>
-#include <thread>
-#include "commontest.hpp"
+#include "commontest.h"
+#include <uv.h>
 
-using namespace std::chrono_literals;
-constexpr int X = DFLX + 1;
+int X = DFLX + 1;
 
 int main()
 {
@@ -20,7 +17,7 @@ int main()
         block_id = IRON_BLOCK;
 
     _TST(cmpi_set_block, &conn, X, DFLY, DFLZ, block_id);
-    std::this_thread::sleep_for(100ms);
+    uv_sleep(100); // ms
     _STORE(new_block_id, cmpi_get_block, &conn, X, DFLY, DFLZ);
     // TODO: Assertion is intermittently failing
     // Although in game, block is set correctly
